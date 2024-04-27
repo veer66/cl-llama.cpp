@@ -9,7 +9,8 @@
 	   "TOKEN-BOS" "TOKEN-EOS" "TOKEN-NL"
 	   "TOKENIZE" "EVALUATE" "GET-EMBEDDINGS" "GET-LOGITS" "SAMPLE-TOP-P-TOP-K" "GET-VOCAB"
 	   ;;
-	   "EMBEDDING" "PERPLEXITY" "LLAMA"))
+	   "EMBEDDING" "PERPLEXITY" "LLAMA"
+	   "CREATE-EMBEDDER" "EMBED"))
 
 (defpackage #:llama.test
   (:use #:cl #:llama)

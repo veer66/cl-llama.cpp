@@ -31,6 +31,32 @@
 	    (%embedding ctx tokens prompt verbose add-beginning-of-sentence))
       (when (> verbose 1) (print-timings ctx)))))
 
+
+(defclass embedder ()
+  ((mdl :initarg :mdl)
+   (ctx :initarg :ctx)))
+
+(defun create-embedder (&key (model *model*) (n-ctx *n-ctx*) ;; (numa *numa*)
+			  (threads *threads*) (threads-batch *threads-batch*)
+			  (ngl *ngl*))
+  #+sbcl (sb-ext::set-floating-point-modes :traps nil)
+  (llama-backend-init)
+  (let* ((mdl (make-instance 'mdl :file model
+				  :params (model-parameters :n-gpu-layers ngl)))
+	 (ctx (make-instance 'ctx :model mdl
+				  :params (context-parameters :embedding t
+							      :n-ctx n-ctx
+							      :n-threads threads
+							      :n-threads-batch threads-batch))))
+    (make-instance 'embedder :mdl mdl :ctx ctx)))
+
+(defmethod embed ((embedder embedder) text
+		  &key (verbose 0) (add-beginning-of-sentence t) (ntokens *n-ctx*))
+  (with-slots (mdl ctx) embedder
+    (let ((tokens (make-instance 'tokens :size ntokens)))
+      (prog1 (%embedding ctx tokens text verbose add-beginning-of-sentence)
+	(when (> verbose 1) (print-timings ctx))))))
+
 ;; ./embedding -p "testing" -ngl 1 | head -c 28
 ;; 1.382774 -1.671184 0.820016 %
 
